@@ -7,11 +7,10 @@ on:
       - feat*
     paths:
       - 'tf_infra/**'
-      - '.github/workflows/terraform.yml'
   workflow_dispatch:
 env:
     AWS_REGION: eu-west-2
-    ECR_REPO_NAME: eks-project-repo
+    ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME }}
     AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
@@ -21,13 +20,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v4
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: eu-west-2
 
       - name: Terraform Init
         run: terraform -chdir=tf_infra init -input=false

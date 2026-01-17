@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   update-gitops:
@@ -16,16 +15,21 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Checkout GitOps repo
-        env:
-          GITOPS_REPO: git@github.com:YOURORG/gitops-repo.git
-          GIT_SSH_KEY: ${{ secrets.GITOPS_SSH_KEY }}
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
         run: |
-          mkdir -p /tmp/gitops && cd /tmp/gitops
-          git clone $GITOPS_REPO .
-          cd charts/outline-app
-          # update image tag
-          yq e '.image.tag = strenv(IMAGE_TAG)' -i values.yaml
-          git add values.yaml
-          git commit -m "ci: update image tag to ${IMAGE_TAG}"
-          git push origin main
+          IMAGE_TAG=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Update image in manifest
+        run: |
+          sed -i "s|image: .*|image: ${{ vars.ECR_REPO_NAME }}:$IMAGE_TAG|" k8s_manifests/deployment.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add k8s_manifests/deployment.yaml
+          git commit -m "gitops: update image to ${IMAGE_TAG}"
+          git push

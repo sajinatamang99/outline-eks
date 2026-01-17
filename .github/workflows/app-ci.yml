@@ -6,8 +6,7 @@ on:
       - main
       - feat*
     paths:
-      - 'tf_infra/**'
-      - '.github/workflows/terraform.yml'
+      - 'app/**'
   workflow_dispatch:
 
 permissions:
@@ -25,14 +24,14 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.CI_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: eu-west-2
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build & push Docker image
         env:
-          ECR_REPO: ${{ vars.ECR_REPO_NAME }}
+          ECR_REPO: eks-project-repo
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
           IMAGE=${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
