@@ -1,0 +1,31 @@
+name: gitops-update
+
+on:
+  workflow_run:
+    workflows: ["app-ci"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  update-gitops:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout GitOps repo
+        env:
+          GITOPS_REPO: git@github.com:YOURORG/gitops-repo.git
+          GIT_SSH_KEY: ${{ secrets.GITOPS_SSH_KEY }}
+        run: |
+          mkdir -p /tmp/gitops && cd /tmp/gitops
+          git clone $GITOPS_REPO .
+          cd charts/outline-app
+          # update image tag
+          yq e '.image.tag = strenv(IMAGE_TAG)' -i values.yaml
+          git add values.yaml
+          git commit -m "ci: update image tag to ${IMAGE_TAG}"
+          git push origin main

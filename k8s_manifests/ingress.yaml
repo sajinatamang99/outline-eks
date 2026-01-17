@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx
+  namespace: outline
+  annotations:
+    ingressClassName: nginx
+    # kubernetes.io/ingress.class: nginx (deprecated: use above instead)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/hostname: "www.devopsproject.org"
+spec:
+  tls:
+    - hosts:
+        - www.devopsproject.org
+      secretName: main-tls
+  rules:
+    - host: www.devopsproject.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gaming
+                port:
+                  number: 80
+
+          - path: /argocd
+            pathType: Prefix
+            backend:
+              service:
+                name: argo-cd-argocd-server
+                port:
+                  number: 80
+
+          - path: /grafana
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-grafana
+                port:
+                  number: 80
