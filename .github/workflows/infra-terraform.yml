@@ -29,7 +29,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
           aws-region: eu-west-2
-
+      - name: AWS Caller Identity
+        run: aws sts get-caller-identity
       - name: Terraform Init
         run: terraform -chdir=tf_infra init -input=false
 
