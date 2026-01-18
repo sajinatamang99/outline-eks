@@ -56,6 +56,11 @@ provider "helm" {
   }
 }
 
+resource "time_sleep" "wait_for_eks" {
+  depends_on      = [module.eks]
+  create_duration = "60s"
+}
+
 module "helm" {
   source                = "./modules/helm"
   external_dns_role_arn = module.eks.external_dns_role_arn
@@ -63,5 +68,5 @@ module "helm" {
     helm       = helm
     kubernetes = kubernetes
   }
-  depends_on = [module.eks, data.aws_eks_cluster.cluster, data.aws_eks_cluster_auth.cluster]
+  depends_on = [time_sleep.wait_for_eks]
 }
