@@ -6,6 +6,10 @@ on:
       - main
       - feat*
   workflow_dispatch:
+  workflow_run:
+    workflows: ["infra-terraform"]
+    types:
+      - completed
 
 permissions:
   contents: read
