@@ -23,6 +23,9 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
