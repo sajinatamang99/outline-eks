@@ -7,7 +7,7 @@ on:
       - feat*
   workflow_dispatch:
 env:
-    AWS_REGION: eu-west-2
+    AWS_REGION: us-east-1
     ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME }}
     AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
@@ -28,7 +28,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
-          aws-region: eu-west-2
+          aws-region: us-east-1
 
       - name: Terraform Init
         run: terraform -chdir=tf_infra init -input=false
