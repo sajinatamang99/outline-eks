@@ -32,15 +32,34 @@ jobs:
 
       - name: Terraform Init
         run: terraform -chdir=tf_infra init -input=false
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.27.4'
-
-      - name: Update kubeconfig for EKS
-        run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
       - name: Terraform Plan
         run: terraform -chdir=tf_infra plan -out=tfplan -input=false
 
       - name: Terraform Apply
         run: terraform -chdir=tf_infra apply -auto-approve tfplan
+  setup-k8s:
+    runs-on: ubuntu-latest
+    needs: terraform   # This ensures Terraform job completes first
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
+          aws-region: us-east-1
+
+      - name: Install kubectl
+        uses: aws/setup-kubectl@v3
+        with:
+          version: 'v1.27.4'
+
+      - name: Update kubeconfig for EKS
+        run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
+
+      - name: Verify cluster
+        run: kubectl get nodes
