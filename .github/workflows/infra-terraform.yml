@@ -32,9 +32,13 @@ jobs:
 
       - name: Terraform Init
         run: terraform -chdir=tf_infra init -input=false
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.27.4'
+
       - name: Update kubeconfig for EKS
-        run: |
-          aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
+        run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
       - name: Terraform Plan
         run: terraform -chdir=tf_infra plan -out=tfplan -input=false
 
