@@ -63,6 +63,8 @@ resource "time_sleep" "wait_for_eks" {
 
 module "helm" {
   source                = "./modules/helm"
+  eks_cluster_name      = module.eks.cluster_name
+  eks_cluster_endpoint  = module.eks.cluster_endpoint
   external_dns_role_arn = module.eks.external_dns_role_arn
   providers = {
     helm       = helm
