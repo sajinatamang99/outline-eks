@@ -1,4 +1,4 @@
-name: infra-terraform
+name: Terraform
 
 on:
   push:
@@ -6,60 +6,64 @@ on:
       - main
       - feat*
   workflow_dispatch:
+  
 env:
     AWS_REGION: us-east-1
     ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME }}
     AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
-  terraform:
+  apply-infra:
+    name: Apply Infra (VPC, ECR, EKS)
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
+        aws-region: us-east-1
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
-          aws-region: us-east-1
+    - name: Terraform Init
+      working-directory: terraform
+      run: terraform init
 
-      - name: Terraform Init
-        run: terraform -chdir=tf_infra init -input=false
-      - name: Terraform Plan
-        run: terraform -chdir=tf_infra plan -out=tfplan -input=false
+    - name: Terraform Apply (Infra Modules)
+      working-directory: terraform
+      run: |
+        terraform apply -auto-approve -target=module.vpc
+        terraform apply -auto-approve -target=module.ecr
+        terraform apply -auto-approve -target=module.eks
 
-      - name: Terraform Apply
-        run: terraform -chdir=tf_infra apply -auto-approve tfplan
-  setup-k8s:
+  apply-helm:
+    name: Apply Helm
     runs-on: ubuntu-latest
-    needs: terraform   # This ensures Terraform job completes first
-    permissions:
-      id-token: write
-      contents: read
+    needs: apply-infra
 
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
-          aws-region: us-east-1
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
 
-      - name: Install kubectl
-        uses: aws/setup-kubectl@v3
-        with:
-          version: 'v1.27.4'
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
+        aws-region: us-east-1
 
-      - name: Update kubeconfig for EKS
-        run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
+    - name: Terraform Init
+      working-directory: terraform
+      run: terraform init
 
-      - name: Verify cluster
-        run: kubectl get nodes
+    - name: Terraform Apply (Helm)
+      working-directory: terraform
+      run: |
+        terraform apply -auto-approve -target=module.helm
