@@ -38,7 +38,7 @@ jobs:
       run: terraform init
 
     - name: Terraform Apply (Infra Modules)
-      working-directory: terraform
+      working-directory: tf_infra
       run: |
         terraform apply -auto-approve -target=module.vpc
         terraform apply -auto-approve -target=module.ecr
@@ -70,6 +70,6 @@ jobs:
       run: terraform init
 
     - name: Terraform Apply (Helm)
-      working-directory: terraform
+      working-directory: tf_infra
       run: |
         terraform apply -auto-approve -target=module.helm
