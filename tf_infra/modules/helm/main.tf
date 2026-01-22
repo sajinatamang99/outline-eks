@@ -9,12 +9,41 @@ terraform {
   }
 }
 
+data "aws_eks_cluster" "cluster" {
+  name = var.eks_cluster_name
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = var.eks_cluster_name
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(
+    data.aws_eks_cluster.cluster.certificate_authority[0].data
+  )
+  token                  = data.aws_eks_cluster_auth.cluster.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(
+      data.aws_eks_cluster.cluster.certificate_authority[0].data
+    )
+    token                  = data.aws_eks_cluster_auth.cluster.token
+  }
+}
+
 # Use the Terraform Helm provider to install Kubernetes add-ons:
 resource "helm_release" "nginx_ingress" {
   name       = "ingress-nginx"
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
   version    = "4.13.3"
+  depends_on = [
+    data.aws_eks_cluster.cluster
+  ]
 
   create_namespace = true
   namespace        = "ingress-nginx"
@@ -31,6 +60,9 @@ resource "helm_release" "cert_manager" {
 
   create_namespace = true
   namespace        = "cert-manager"
+  depends_on = [
+    data.aws_eks_cluster.cluster
+  ]
 
   values = [
     "${file("${path.module}/values/cert-manager.yaml")}"
@@ -43,6 +75,9 @@ resource "helm_release" "external_dns" {
   chart            = "external-dns"
   create_namespace = true
   namespace        = "external-dns"
+  depends_on = [
+    data.aws_eks_cluster.cluster
+  ]
 
   set {
     name  = "serviceAccount.create"
@@ -77,7 +112,7 @@ resource "helm_release" "argocd" {
     "${file("${path.module}/values/argocd.yaml")}"
   ]
 
-  depends_on = [helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
+  depends_on = [data.aws_eks_cluster.cluster, helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
 }
 
 resource "helm_release" "kube_prometheus_stack" {
@@ -94,5 +129,5 @@ resource "helm_release" "kube_prometheus_stack" {
     "${file("${path.module}/values/kube-prometheus-stack.yaml")}"
   ]
 
-  depends_on = [helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
+  depends_on = [data.aws_eks_cluster.cluster, helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
 }
