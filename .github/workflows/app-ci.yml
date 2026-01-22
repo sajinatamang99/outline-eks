@@ -1,0 +1,51 @@
+name: app-ci
+
+on:
+  push:
+    branches: [ main, feat* ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-west-2
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  ECR_REPO: ${{ vars.ECR_REPO_NAME }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # Checkout
+      - uses: actions/checkout@v4
+
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Login to ECR
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build and push Docker image
+      - name: Build & Push Docker Image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA::7}
+          IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:$IMAGE_TAG
+          docker build -t $IMAGE ./k8s_manifests
+          docker push $IMAGE
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      # Update application manifests for Argo CD
+      - name: Update Kubernetes manifests
+        run: |
+          sed -i "s|image: .*|image: $IMAGE|" k8s_manifests/deployment.yaml
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add k8s_manifests/deployment.yaml
+          git commit -m "ci: update image to $IMAGE_TAG" || echo "No changes to commit"
+          git push

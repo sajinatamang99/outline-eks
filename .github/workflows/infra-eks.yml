@@ -1,0 +1,61 @@
+name: infra-eks
+
+on:
+  push:
+    branches: [ main, feat* ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # Checkout
+      - uses: actions/checkout@v4
+
+      # Terraform setup
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
+          aws-region: us-east-1
+
+      # Terraform init & apply
+      - name: Terraform Init & Apply
+        run: |
+          terraform -chdir=tf_infra init -input=false
+          terraform -chdir=tf_infra apply -auto-approve
+
+      # Export outputs for CI pipeline
+      - name: Set Terraform outputs
+        run: |
+          echo "ECR_REPO=$(terraform -chdir=tf_infra output -raw ecr_repo_name)" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=$(terraform -chdir=tf_infra output -raw cluster_name)" >> $GITHUB_ENV
+
+      # Optional Argo CD bootstrap (run manually once)
+      - name: Bootstrap Argo CD
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          # Install kubectl
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+          # Update kubeconfig
+          aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
+
+          # Apply Argo CD bootstrap manifests
+          kubectl apply -f argo-cd/bootstrap/namespace.yaml
+          kubectl apply -f argo-cd/bootstrap/argocd-install.yaml
