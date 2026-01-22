@@ -16,7 +16,10 @@ jobs:
   apply-infra:
     name: Apply Infra (VPC, ECR, EKS)
     runs-on: ubuntu-latest
-
+    permissions:
+      id-token: write
+      contents: read
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -45,7 +48,10 @@ jobs:
     name: Apply Helm
     runs-on: ubuntu-latest
     needs: apply-infra
-
+    permissions:
+      id-token: write
+      contents: read
+      
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
