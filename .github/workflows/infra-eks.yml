@@ -38,18 +38,6 @@ jobs:
           terraform -chdir=tf_infra init -input=false
           terraform -chdir=tf_infra apply -auto-approve
 
-      # Export outputs for CI pipeline
-      - name: Set Terraform outputs
-        run: |
-          ECR_REPO=$(terraform -chdir=tf_infra output -json ecr_repo_name | jq -r '.')
-          CLUSTER_NAME=$(terraform -chdir=tf_infra output -json cluster_name | jq -r '.')
-          CLUSTER_ENDPOINT=$(terraform -chdir=tf_infra output -json cluster_endpoint | jq -r '.')
-
-          echo "ECR_REPO=$ECR_REPO" >> $GITHUB_ENV
-          echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
-          echo "CLUSTER_ENDPOINT=$CLUSTER_ENDPOINT" >> $GITHUB_ENV
-
-
       # Optional Argo CD bootstrap (run manually once)
       - name: Bootstrap Argo CD
         if: ${{ github.event_name == 'workflow_dispatch' }}
