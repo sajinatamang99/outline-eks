@@ -50,7 +50,7 @@ jobs:
       - name: Install Argo CD
         run: |
           kubectl apply -f argo-cd/bootstrap/namespace.yaml
-          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+          kubectl apply -n argo-cd -f argocd-install.yaml
 
       - name: Apply root App-of-Apps
         run: kubectl apply -f argo-cd/Application.yaml
