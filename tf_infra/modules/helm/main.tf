@@ -15,9 +15,6 @@ resource "helm_release" "nginx_ingress" {
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
   version    = "4.13.3"
-  depends_on = [
-    data.aws_eks_cluster.cluster
-  ]
 
   create_namespace = true
   namespace        = "ingress-nginx"
@@ -34,9 +31,6 @@ resource "helm_release" "cert_manager" {
 
   create_namespace = true
   namespace        = "cert-manager"
-  depends_on = [
-    data.aws_eks_cluster.cluster
-  ]
 
   values = [
     "${file("${path.module}/values/cert-manager.yaml")}"
@@ -49,9 +43,6 @@ resource "helm_release" "external_dns" {
   chart            = "external-dns"
   create_namespace = true
   namespace        = "external-dns"
-  depends_on = [
-    data.aws_eks_cluster.cluster
-  ]
 
   set {
     name  = "serviceAccount.create"
@@ -86,7 +77,7 @@ resource "helm_release" "argocd" {
     "${file("${path.module}/values/argocd.yaml")}"
   ]
 
-  depends_on = [data.aws_eks_cluster.cluster, helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
+  depends_on = [helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
 }
 
 resource "helm_release" "kube_prometheus_stack" {

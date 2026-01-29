@@ -39,6 +39,11 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
+    - name: Terraform Plan (Infra Modules)
+      run: |
+        terraform plan -target=module.vpc
+        terraform plan -target=module.ecr
+        terraform plan -target=module.eks
 
     - name: Terraform Apply (Infra Modules)
       run: |
@@ -69,7 +74,9 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-
+    - name: Terraform Plan (Infra Modules)
+      run: |
+        terraform plan -target=module.helm
     - name: Terraform Apply (Helm)
       run: |
         terraform apply -auto-approve -target=module.helm
