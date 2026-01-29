@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, feat* ]
   workflow_dispatch:
-    
+
 permissions:
   id-token: write
   contents: read
@@ -34,7 +34,7 @@ jobs:
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
           IMAGE=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ vars.ECR_REPO_NAME }}:$IMAGE_TAG
-          docker build -t $IMAGE ./k8s-manifest
+          docker build -t $IMAGE ./outline-apps
           docker push $IMAGE
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
