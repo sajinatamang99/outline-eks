@@ -1,0 +1,52 @@
+name: argocd-bootstrap
+
+on:
+  push:
+    branches: [ main, feat* ]
+  workflow_run:
+    workflows: ["infra-eks"]
+    types: [completed]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-west-2
+  CLUSTER_NAME: eks-prod-cluster
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TF_ASSUME_ROLE }}
+          aws-region: us-east-1
+
+      # This is cloud-agnostic, name is misleading but correct
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.27.4
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
+
+      - name: Wait for EKS readiness
+        run: |
+          for i in {1..30}; do
+            kubectl get nodes && exit 0
+            echo "Waiting for cluster..."
+            sleep 10
+          done
+          echo "Cluster not ready in time" && exit 1
+
+      - name: Install Argo CD
+        run: |
+          kubectl apply -f argo-cd/bootstrap/namespace.yaml
+          kubectl apply -n argocd -f argo-cd/bootstrap/argocd-install.yaml
+
+      - name: Apply root App-of-Apps
+        run: kubectl apply -f argo-cd/Application.yaml

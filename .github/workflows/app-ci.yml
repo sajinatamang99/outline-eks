@@ -11,41 +11,49 @@ env:
   ECR_REPO: ${{ vars.ECR_REPO_NAME }}
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
-      # Checkout
       - uses: actions/checkout@v4
 
-      # Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.CI_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1
 
-      # Login to ECR
-      - name: Login to Amazon ECR
+      - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build and push Docker image
       - name: Build & Push Docker Image
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
-          IMAGE=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:$IMAGE_TAG
-          docker build -t $IMAGE ./k8s_manifests
+          IMAGE=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/${{ vars.ECR_REPO_NAME }}:$IMAGE_TAG
+          docker build -t $IMAGE ./k8s-manifest
           docker push $IMAGE
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      # Update application manifests for Argo CD
-      - name: Update Kubernetes manifests
+      - name: Update deployment manifest image
         run: |
-          sed -i "s|image: .*|image: $IMAGE|" k8s_manifests/deployment.yaml
+          sed -i "s|image: .*|image: $IMAGE|" k8s-manifest/deployment.yaml
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add k8s_manifests/deployment.yaml
-          git commit -m "ci: update image to $IMAGE_TAG" || echo "No changes to commit"
+          git add k8s-manifest/deployment.yaml
+          git commit -m "ci: update image $IMAGE_TAG"
           git push
+
+      - name: Install kubectl & Argo CD CLI
+        uses: azure/setup-kubectl@v3
+        with:
+          version: '1.27.4'
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
+
+      - name: Sync Argo CD apps
+        run: |
+          # Login to Argo CD server
+          argocd login argocd.us-east-1.example.com --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+          # Sync root app (App-of-Apps)
+  

@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/sajinatamang99/outline-eks.git'
     targetRevision: main
-    path: k8s_manifests
+    path: argo-cd/platforms
   destination:
     server: https://kubernetes.default.svc
     namespace: outline
