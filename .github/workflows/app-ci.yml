@@ -7,10 +7,10 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 env:
-  AWS_REGION: eu-west-2
+  AWS_REGION: us-east-1
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   ECR_REPO: ${{ vars.ECR_REPO_NAME }}
 
