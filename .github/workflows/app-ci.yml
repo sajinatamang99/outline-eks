@@ -53,7 +53,7 @@ jobs:
           fi
 
       - name: Install kubectl & Argo CD CLI
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: '1.27'
 
