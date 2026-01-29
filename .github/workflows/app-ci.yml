@@ -76,7 +76,7 @@ jobs:
       - name: Sync Argo CD apps
         run: |
           # Login to Argo CD server
-          argocd login argocd.us-east-1.devopsproject.org --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+          argocd login argocd.eks.devopsproject.org --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
 
           # Sync root app (App-of-Apps)
           argocd app sync root-app
