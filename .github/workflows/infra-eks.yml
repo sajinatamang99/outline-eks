@@ -3,6 +3,8 @@ name: infra-eks
 on:
   push:
     branches: [ main, feat* ]
+    paths:
+      - "tf_infra/**"
   workflow_dispatch:
 
 env:
