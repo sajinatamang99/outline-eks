@@ -13,6 +13,7 @@ env:
   AWS_REGION: us-east-1
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   ECR_REPO: ${{ vars.ECR_REPO_NAME }}
+  ARGOCD_PASSWORD: ${{ secrets.ARGOCD_PASSWORD }}
 
 jobs:
   build-and-deploy:
@@ -63,9 +64,20 @@ jobs:
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
 
+      - name: Install Argo CD CLI
+        run: |
+          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/argocd
+
+      - name: Verify Argo CD CLI
+        run: argocd version --client
+
       - name: Sync Argo CD apps
         run: |
           # Login to Argo CD server
-          argocd login argocd.us-east-1.example.com --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+          argocd login argocd.us-east-1.devopsproject.org --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+
           # Sync root app (App-of-Apps)
+          argocd app sync root-app
   
