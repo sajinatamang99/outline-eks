@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: webapp
-          image: 380883743609.dkr.ecr.us-east-1.amazonaws.com/eks-project-repo:latest
+          image: 
           ports:
             - containerPort: 80
           env:
