@@ -2,7 +2,7 @@ name: gitops-update
 
 on:
   workflow_run:
-    workflows: ["app-ci"]
+    workflows: ["infra-terraform"]
     types:
       - completed
 

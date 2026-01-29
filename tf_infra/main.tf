@@ -56,11 +56,6 @@ provider "helm" {
   }
 }
 
-resource "time_sleep" "wait_for_eks" {
-  depends_on      = [module.eks]
-  create_duration = "60s"
-}
-
 module "helm" {
   source                = "./modules/helm"
   eks_cluster_name      = module.eks.cluster_name
@@ -70,5 +65,5 @@ module "helm" {
     helm       = helm
     kubernetes = kubernetes
   }
-  depends_on = [time_sleep.wait_for_eks]
+  depends_on = [module.eks]
 }
