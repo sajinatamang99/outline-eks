@@ -52,10 +52,13 @@ jobs:
             git push
           fi
 
-      - name: Install kubectl & Argo CD CLI
-        uses: azure/setup-kubectl@v4
-        with:
-          version: '1.27'
+      - name: Install kubectl
+        run: |
+          KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable-1.27.txt)
+          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
 
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
