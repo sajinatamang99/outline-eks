@@ -1,10 +1,11 @@
-apiVersion: v1
 # Argo CD system namespace
+apiVersion: v1
 kind: Namespace 
 metadata:
   name: argocd
 ---
 # Your application namespace
+apiVersion: v1
 kind: Namespace
 metadata:
   name: outline
