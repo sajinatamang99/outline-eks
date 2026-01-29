@@ -50,7 +50,7 @@ jobs:
       - name: Install kubectl & Argo CD CLI
         uses: azure/setup-kubectl@v3
         with:
-          version: '1.27.4'
+          version: '1.27'
 
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name eks-prod-cluster --region us-east-1
