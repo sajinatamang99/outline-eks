@@ -1,8 +1,12 @@
 name: gitops-update
 
 on:
+  push:
+    branches:
+      - main
+      - feat*
   workflow_run:
-    workflows: ["infra-terraform"]
+    workflows: ["Terraform"]
     types:
       - completed
 
