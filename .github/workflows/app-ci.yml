@@ -4,6 +4,10 @@ on:
   push:
     branches: [ main, feat* ]
   workflow_dispatch:
+    
+permissions:
+  id-token: write
+  contents: read
 
 env:
   AWS_REGION: eu-west-2

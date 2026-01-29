@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root-apps
+  name: my-app
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/sajinatamang99/outline-eks.git'
     targetRevision: feat3
-    path: argo-cd/platforms
+    path: k8s-manifest
   destination:
     server: https://kubernetes.default.svc
     namespace: outline
@@ -18,4 +18,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      
