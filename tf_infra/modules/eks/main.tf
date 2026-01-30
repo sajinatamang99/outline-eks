@@ -8,6 +8,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     security_group_ids      = var.cluster_security_group_ids
     endpoint_public_access  = true
     endpoint_private_access = false
+    public_access_cidrs     = ["0.0.0.0/0"]
   }
   tags = local.tags
 }
