@@ -9,7 +9,7 @@ serviceAccount:
   name: external-dns
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    eks.amazonaws.com/role-arn: ${external_dns_role_arn}
+    eks.amazonaws.com/role-arn: "arn:aws:iam::380883743609:role/external-dns"
 
 domainFilter:
   - devopsproject.org

@@ -6,7 +6,7 @@ module "eks" {
 
   # cluster_endpoint_public_access = true
   endpoint_public_access  = true
-  endpoint_private_access = true
+  endpoint_private_access = false
 
   endpoint_public_access_cidrs             = ["0.0.0.0/0"]
   enable_irsa                              = true
