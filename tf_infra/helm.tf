@@ -36,7 +36,7 @@ resource "helm_release" "external_dns" {
 
   create_namespace = true
   namespace        = "external-dns"
-
+  replace = true
 
   depends_on = [module.external_dns_irsa_role]
 
