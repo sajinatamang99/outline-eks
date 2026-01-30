@@ -12,22 +12,6 @@ module "eks" {
   enable_irsa                              = true
   enable_cluster_creator_admin_permissions = true
 
-  access_entries = {
-    github_actions = {
-      principal_arn = "arn:aws:iam::380883743609:role/outline-github-actions-app-ci-role"
-
-      policy_associations = {
-        admin = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            type = "cluster"
-          }
-        }
-      }
-    }
-  }
-
-
   vpc_id                   = module.vpc.vpc_id
   subnet_ids               = module.vpc.private_subnets
   control_plane_subnet_ids = module.vpc.public_subnets
