@@ -1,0 +1,43 @@
+#build/push image + update GitOps repo
+name: app-ci
+on:
+  push:
+    branches:
+      - main
+      - feat*
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Terraform"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push Docker image
+        env:
+          ECR_REPO: eks-project-repo
+        run: |
+          IMAGE_TAG=${GITHUB_SHA::7}
+          IMAGE=${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+          docker build -t $IMAGE ./outline
+          docker push $IMAGE
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV

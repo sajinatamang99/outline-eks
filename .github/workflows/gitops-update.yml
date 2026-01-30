@@ -1,0 +1,39 @@
+name: gitops-update
+
+on:
+  push:
+    branches:
+      - main
+      - feat*
+  workflow_run:
+    workflows: ["Terraform"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  update-gitops:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: |
+          IMAGE_TAG=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Update image in manifest
+        run: |
+          sed -i "s|image: .*|image: ${{ vars.ECR_REPO_NAME }}:$IMAGE_TAG|" k8s_manifests/deployment.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add k8s_manifests/deployment.yaml
+          git commit -m "gitops: update image to ${IMAGE_TAG}"
+          git push
