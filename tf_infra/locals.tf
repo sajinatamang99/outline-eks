@@ -4,8 +4,8 @@ data "aws_route53_zone" "this" {
 
 locals {
   name = "eks-cluster"
-  domain = "devopsproject.org"
-  region = "us-east-1"
+  # domain = "devopsproject.org"
+  # region = "us-east-1"
   azs              = ["eu-west-2a", "eu-west-2b"]
   vpc_cidr         = "10.0.0.0/16"
   hosted_zones_arn = data.aws_route53_zone.this.arn
