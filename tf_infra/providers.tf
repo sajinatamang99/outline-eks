@@ -1,9 +1,9 @@
 terraform {
   required_version = ">= 1.12.2"
-  
+
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = ">= 6.15.0, < 7.0" # my eks terraform module requires 6.15.0
     }
 
@@ -12,7 +12,7 @@ terraform {
       version = "= 3.0.2"
     }
   }
-  
+
   backend "s3" {
     bucket       = "eksproject-prodbackend"
     key          = "tf_infra/terraform.tfstate"

@@ -38,8 +38,8 @@ resource "helm_release" "external_dns" {
   namespace        = "external-dns"
 
 
-  depends_on = [ module.external_dns_irsa_role ]
-  
+  depends_on = [module.external_dns_irsa_role]
+
   values = [
     file("./helm-values/external-dns.yaml")
   ]
@@ -50,7 +50,7 @@ resource "helm_release" "argocd_deploy" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
-  timeout    = 600
+  timeout    = 1200
   version    = "7.7.9"
 
   create_namespace = true
@@ -77,6 +77,6 @@ resource "helm_release" "kube_prom_stack" {
     file("./helm-values/monitoring.yaml")
   ]
 
-  depends_on = [ helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
+  depends_on = [helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
 
 }

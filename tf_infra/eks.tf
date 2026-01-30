@@ -1,14 +1,14 @@
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "21.15.1"
+  source             = "terraform-aws-modules/eks/aws"
+  version            = "21.15.1"
   name               = local.name
   kubernetes_version = "1.33"
 
   # cluster_endpoint_public_access = true
-  endpoint_public_access = true
-  endpoint_private_access      = true
-  
-  endpoint_public_access_cidrs = ["0.0.0.0/0"]
+  endpoint_public_access  = true
+  endpoint_private_access = true
+
+  endpoint_public_access_cidrs             = ["0.0.0.0/0"]
   enable_irsa                              = true
   enable_cluster_creator_admin_permissions = true
 
@@ -30,10 +30,10 @@ module "eks" {
   eks_managed_node_groups = {
     worker1 = {
       instance_types = ["t3.large"]
-      min_size     = 1
-      max_size     = 2
-      desired_size = 1
-      disk_size = 20
+      min_size       = 1
+      max_size       = 2
+      desired_size   = 1
+      disk_size      = 20
     }
   }
 
