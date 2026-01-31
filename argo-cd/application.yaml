@@ -12,12 +12,12 @@ spec:
     path: manifest
 
   destination:
-    namespace: apps
+    namespace: outline
     server: 'https://kubernetes.default.svc'
 
   syncPolicy:
- #   syncOptions:
-  #    - CreateNamespace=true
+    syncOptions:
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true

@@ -103,7 +103,6 @@ jobs:
       - name: Deploy application
         run: |
           kubectl apply -f argo-cd/application.yaml    
-          kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argo-cd
   
       - name: Apply manifests
         run: 
