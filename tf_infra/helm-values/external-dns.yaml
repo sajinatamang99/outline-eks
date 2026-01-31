@@ -1,9 +1,9 @@
 image:
   registry: docker.io
-  repository: bitnami/external-dns
-  tag: 0.18.0
+  repository: kubernetes-sigs/external-dns
+  tag: v0.14.2
   pullPolicy: IfNotPresent
-
+  
 provider: aws
 
 env:
