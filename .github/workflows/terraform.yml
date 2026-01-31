@@ -106,10 +106,11 @@ jobs:
           kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argo-cd
   
       - name: Apply manifests
-        run: kubectl apply -f manifests/deployment.yaml
-             kubectl apply -f manifests/ingress.yaml
-             kubectl apply -f manifests/service.yaml
-             kubectl apply -f manifests/namespace.yaml
-
+        run: 
+          kubectl apply -f manifests/namespace.yaml
+          kubectl apply -f manifests/deployment.yaml
+          kubectl apply -f manifests/ingress.yaml
+          kubectl apply -f manifests/service.yaml
+             
       - name: Decode password
         run: kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d || echo "Secret not found"
