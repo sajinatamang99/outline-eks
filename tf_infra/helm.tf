@@ -5,6 +5,7 @@ resource "helm_release" "nginx_ingress" {
   version    = "4.14.2"
   timeout = 600
   wait    = false 
+  replace          = true
 
   create_namespace = true
   namespace        = "nginx-ingress"
