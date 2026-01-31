@@ -102,11 +102,11 @@ jobs:
    
       - name: Deploy application
         run: |
+          kubectl apply -f manifests/namespace.yaml
           kubectl apply -f argo-cd/application.yaml    
   
       - name: Apply manifests
         run: 
-          kubectl apply -f manifests/namespace.yaml
           kubectl apply -f manifests/deployment.yaml
           kubectl apply -f manifests/ingress.yaml
           kubectl apply -f manifests/service.yaml
