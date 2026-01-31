@@ -1,3 +1,9 @@
+image:
+  registry: docker.io
+  repository: bitnami/external-dns
+  tag: 0.18.0
+  pullPolicy: IfNotPresent
+  
 provider: aws
 
 env:
