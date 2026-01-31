@@ -3,7 +3,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.9.0"
 
-  name = local.name
+  name = local.vpc_name
   cidr = local.vpc_cidr
 
   azs             = local.azs
@@ -16,12 +16,12 @@ module "vpc" {
 
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/${local.name}" = "shared"
+    "kubernetes.io/cluster/${local.vpc_name}" = "shared"
     "kubernetes.io/role/elb"              = "1"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/${local.name}" = "shared"
+    "kubernetes.io/cluster/${local.vpc_name}" = "shared"
     "kubernetes.io/role/internal-elb"     = "1"
   }
 

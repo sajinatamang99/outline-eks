@@ -1,9 +1,3 @@
-image:
-  image:
-  registry: ghcr.io
-  repository: kubernetes-sigs/external-dns/external-dns
-  tag: v0.18.0
-  pullPolicy: IfNotPresent
 
 provider: aws
 
@@ -21,6 +15,3 @@ serviceAccount:
 domainFilter:
   - devopsproject.org
   
-# 🚑 Disable probes to avoid conflicts
-livenessProbe: null
-readinessProbe: null

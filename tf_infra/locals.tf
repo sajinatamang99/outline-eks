@@ -1,5 +1,6 @@
 locals {
-  name = "eks-cluster"
+  cluster_name = "eks-cluster"
+  vpc_name = "eks-vpc"
   # domain = "devopsproject.org"
   region           = "us-east-1"
   azs              = ["us-east-1a", "us-east-1b"]
