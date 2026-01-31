@@ -3,7 +3,7 @@ image:
   repository: bitnami/external-dns
   tag: 0.18.0
   pullPolicy: IfNotPresent
-  
+
 provider: aws
 
 env:
@@ -20,3 +20,6 @@ serviceAccount:
 domainFilter:
   - devopsproject.org
   
+# 🚑 Disable probes to avoid conflicts
+livenessProbe: null
+readinessProbe: null
