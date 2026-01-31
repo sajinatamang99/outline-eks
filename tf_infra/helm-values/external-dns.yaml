@@ -1,6 +1,7 @@
 image:
-  registry: docker.io
-  repository: kubernetes-sigs/external-dns
+  image:
+  registry: ghcr.io
+  repository: kubernetes-sigs/external-dns/external-dns
   tag: v0.14.2
   pullPolicy: IfNotPresent
   
