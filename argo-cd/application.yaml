@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-app
+  namespace: argo-cd
+spec:
+  project: default
+
+  source:
+    repoURL: 'https://github.com/sajinatamang99/outline-eks'
+    targetRevision: feat4
+    path: manifest
+
+  destination:
+    namespace: outline
+    server: 'https://kubernetes.default.svc'
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true

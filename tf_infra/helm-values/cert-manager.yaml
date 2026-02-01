@@ -1,0 +1,13 @@
+extraArgs:
+  - --dns01-recursive-nameservers="8.8.8.8:53"
+  - --dns01-recursive-nameservers-only
+
+serviceAccount:
+  create: true
+  name: cert-manager
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    eks.amazonaws.com/role-arn: "arn:aws:iam::380883743609:role/cert-manager"
+crds:
+  enabled: true
+  
