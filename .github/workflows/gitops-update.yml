@@ -1,13 +1,9 @@
 name: gitops-update
 
 on:
-  push:
-    branches:
-      - main
-      - feat*
   workflow_dispatch:
   workflow_run:
-    workflows: ["Terraform"]
+    workflows: ["build"]
     types:
       - completed
 
@@ -29,12 +25,12 @@ jobs:
 
       - name: Update image in manifest
         run: |
-          sed -i "s|image: .*|image: ${{ vars.ECR_REPO_NAME }}:$IMAGE_TAG|" k8s_manifests/deployment.yaml
+          sed -i "s|image: .*|image: ${{ env.ECR_URI }}:$IMAGE_TAG|" k8s_manifests/deployment.yaml
 
       - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add k8s_manifests/deployment.yaml
+          git add manifests/deployment.yaml
           git commit -m "gitops: update image to ${IMAGE_TAG}"
           git push

@@ -1,9 +1,10 @@
-name: CI
+name: build
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - "outline/**"
+  workflow_run:
+    workflows: ["terraform"]
+    types:
+      - completed
 
 permissions:
   id-token: write
@@ -12,33 +13,33 @@ permissions:
 
 defaults:
   run:
-    working-directory: ./outline
+    working-directory: outline
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ECR_URI: "${{ secrets.ECR_URI }}"
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set short SHA
-        run: echo "SHORT_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
-
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: "${{ secrets.ROLE_ARN }}"
-          role-session-name: github-actions-session
+          role-to-assume: ${{ secrets.CI_ROLE_ARN }}
           aws-region: eu-west-2
 
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build image
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPO_NAME: ${{ env.ECR_REPO_NAME }}
+          IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_URI:$SHORT_SHA .
+          IMAGE_TAG=${GITHUB_SHA::7}
+          docker build -t $ECR_REGISTRY/${ECR_REPO_NAME}:$IMAGE_TAG -f app/Dockerfile app
 
       - name: Scan image
         uses: aquasecurity/trivy-action@0.19.0
@@ -47,7 +48,7 @@ jobs:
           format: "table"
           severity: "CRITICAL,HIGH"
           exit-code: 0
-
-      - name: Push image
+      - name: Push Docker image
         run: |
-          docker push $ECR_URI:$SHORT_SHA
+          docker push $ECR_REGISTRY/${ECR_REPO_NAME}:$IMAGE_TAG
+          echo "image_url=$ECR_REGISTRY/${ECR_REPO_NAME}:$IMAGE_TAG" >> $GITHUB_ENV

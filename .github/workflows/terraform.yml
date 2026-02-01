@@ -98,18 +98,7 @@ jobs:
           kubectl wait --for=condition=Ready nodes --all --timeout=300s
 
       - name: Issuer
-        run: kubectl apply -f manifests/cluster-issuer.yaml
+        run: kubectl apply -f platforms/cluster-issuer.yaml
    
       - name: Deploy application
-        run: |
-          kubectl apply -f manifests/namespace.yaml
-          kubectl apply -f argo-cd/application.yaml    
-  
-      - name: Apply manifests
-        run: |
-          kubectl apply -f manifests/deployment.yaml
-          kubectl apply -f manifests/ingress.yaml
-          kubectl apply -f manifests/service.yaml
-             
-      - name: Decode password
-        run: kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d || echo "Secret not found"
+        run: kubectl apply -f argo-cd/application.yaml    

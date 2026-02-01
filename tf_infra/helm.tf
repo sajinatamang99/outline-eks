@@ -67,8 +67,6 @@ resource "helm_release" "argocd_deploy" {
   ]
 
   depends_on = [helm_release.nginx_ingress, helm_release.cert_manager, helm_release.external_dns]
-
-
 }
 
 resource "helm_release" "kube_prom_stack" {
