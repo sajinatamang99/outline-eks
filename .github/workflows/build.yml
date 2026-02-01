@@ -1,5 +1,6 @@
 name: build
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["terraform"]
     types:
@@ -17,6 +18,8 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ECR_REPO_NAME: outline_repo
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
