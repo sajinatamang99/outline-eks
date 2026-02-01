@@ -3,9 +3,9 @@ resource "helm_release" "nginx_ingress" {
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
   version    = "4.14.2"
-  timeout = 600
-  wait    = false 
-  replace          = true
+  timeout    = 600
+  wait       = false
+  replace    = true
 
   create_namespace = true
   namespace        = "nginx-ingress"
@@ -35,8 +35,8 @@ resource "helm_release" "cert_manager" {
 
 resource "helm_release" "external_dns" {
   name       = "external-dns"
-  repository       = "https://kubernetes-sigs.github.io/external-dns/"
-  version          = "1.15.0"
+  repository = "https://kubernetes-sigs.github.io/external-dns/"
+  version    = "1.15.0"
   timeout    = 1200
   chart      = "external-dns"
 
