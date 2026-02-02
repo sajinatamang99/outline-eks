@@ -21,6 +21,7 @@ jobs:
     env:
       ECR_REPO_NAME: outline_repo
       AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
