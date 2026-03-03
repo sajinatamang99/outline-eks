@@ -32,6 +32,9 @@ jobs:
           role-to-assume: ${{ secrets.CI_ROLE_ARN }}
           aws-region: us-east-1
 
+      - name: Verify Region
+        run: aws configure list
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
